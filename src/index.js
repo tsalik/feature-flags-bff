@@ -8,8 +8,43 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+import * as configcat from "@configcat/sdk/cloudflare-worker";
+
 export default {
 	async fetch(request, env, ctx) {
-		return new Response('Hello World!');
-	},
+        const url = new URL(request.url);
+
+        if (url.pathname != "/api/features/") {
+            return new Response(
+                JSON.stringify({ "error": "Invalid endpoint" }),
+                { status: 400, headers : { "Content-Type": "application/json" } }
+            );
+        }
+
+        const country = url.searchParams.get("country");
+        if (!country) {
+            return new Response(
+                JSON.stringify({ error: "Missing required query parameter: country" }),
+                { status: 400, headers: { "Content-Type": "application/json" } }
+            );
+        }
+
+        const buildNumber = request.headers.get("X-Build-Number");
+
+        if (!buildNumber) {
+            return new Response(
+                JSON.stringify({ error: "Missing required header: X-Build-Number" }),
+                { status: 400, headers: { "Content-Type": "application/json" } }
+            );
+        }
+        const configCatClient = configcat.getClient(env.CONFIGCAT_SDK_KEY);
+
+        const showWelcomeMessage = await configCatClient.getValueAsync("showwelcomemessage", false, { country});
+
+        return Response.json(
+            {
+                showWelcomeMessage
+            }
+        );
+	}
 };
