@@ -39,11 +39,13 @@ export default {
         }
         const configCatClient = configcat.getClient(env.CONFIGCAT_SDK_KEY);
 
-        const showWelcomeMessage = await configCatClient.getValueAsync("showwelcomemessage", false, { country});
+        const showWelcomeMessage = await configCatClient.getValueAsync("showwelcomemessage", false, { country });
+        const showCountryFlag = await configCatClient.getValueAsync("showCountryFlag", false, { country });
 
         return Response.json(
             {
-                showWelcomeMessage
+                showWelcomeMessage,
+                showCountryFlag
             }
         );
 	}
